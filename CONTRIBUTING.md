@@ -19,4 +19,4 @@ Besides these, if you want to make an addition, **do not put it in the master br
 
 ### Conducting a pull request
 * The Pull Request Template for this repository can be found [here](PULL_REQUEST_TEMPLATE.md)
-* Any significant feature additions should be noted in the (README file)[README.md] under the Feature section
+* Any significant feature additions should be noted in the [README file](README.md) under the Feature section

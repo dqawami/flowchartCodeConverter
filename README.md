@@ -17,10 +17,10 @@ This will be the test to make sure the converter works, by being able to create 
 NOTE: Many features (saving, compiling, running, etc.) will be added to the system after the flowchart-to-code component is tested. 
 
 ## Contributing
-If you want to contribute, please go to the (Contributing file)[CONTRIBUTING.md] for details.
+If you want to contribute, please go to the [Contributing file](CONTRIBUTING.md) for details.
 
 ## Author
 * Daryan Qawami
 
 ## License
-This project is licensed under the GNU GPLv3 License - See the (LICENSE.md file)[LICENSE.md] for details. 
+This project is licensed under the GNU GPLv3 License - See the [LICENSE.md file](LICENSE.md) for details. 

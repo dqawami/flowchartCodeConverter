@@ -23,4 +23,4 @@ If you want to contribute, please go to the [Contributing file](CONTRIBUTING.md)
 * Daryan Qawami
 
 ## License
-This project is licensed under the GNU GPLv3 License - See the [LICENSE.md file](LICENSE.md) for details. 
+This project is licensed under the GNU GPLv3 License - See the [LICENSE file](LICENSE) for details. 

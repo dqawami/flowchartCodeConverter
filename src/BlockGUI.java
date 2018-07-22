@@ -2,7 +2,7 @@
  * BlockGUI is the main method to parse code and create the flowchart
  * 
  * @author Minh Vo
- * @version 0.0.3
+ * @version 0.0.4
  */
 import java.awt.*;
 import java.awt.event.*;
@@ -248,24 +248,48 @@ class BlockCanvas extends JPanel
 		prevPoint = new Point(e.getX(), e.getY());
 		editing = true;
 		
-		// get all blocks clicked on
-		for (int i = 0; i < blocks.size(); i++) {
-			if(blocks.get(i).containsPoint(prevPoint)) {
-				actionBlocks.add(blocks.get(i));
+		if(!editPane.isEditPreFlag() && !editPane.isEditNextFlag()) {
+			// get all blocks clicked on
+			for (int i = 0; i < blocks.size(); i++) {
+				if(blocks.get(i).containsPoint(prevPoint)) {
+					actionBlocks.add(blocks.get(i));
+				}
 			}
-		}
 
-		// Enable the editor pane and add all action blocks for it to edit
-		getEditPane().setEnabled(true);
-		getEditPane().setEditedBlocks(actionBlocks);
+			// Enable the editor pane and add all action blocks for it to edit
+			getEditPane().setEnabled(true);
+			getEditPane().setEditedBlocks(actionBlocks);
 		
-		// Set the edit pane's prompt
-		getEditPane().getPrompt().setText("Editing " + 
-			actionBlocks.get(0).getType() + " block with message: " + 
-			actionBlocks.get(0).getMsg() + ". Press any button.");
+			// Set the edit pane's prompt
+			getEditPane().getPrompt().setText("Editing " + 
+				actionBlocks.get(0).getType() + " block with message: \"" + 
+				actionBlocks.get(0).getMsg() + "\". Press any button.");
 
-		// Remove all action blocks
-		actionBlocks.clear();
+			// Remove all action blocks
+			actionBlocks.clear();
+		} else {
+			// get all blocks clicked on
+			for (int i = 0; i < blocks.size(); i++) {
+				if(blocks.get(i).containsPoint(prevPoint)) {
+					actionBlocks.add(blocks.get(i));
+					break;
+				}
+			}
+			
+			// Add all action blocks to the PreNextBlocks of edit pane
+			getEditPane().setNewPreNextBlocks(actionBlocks);
+			
+			// Set new prompt message
+			String preNextMsg = "Selected " + 
+				actionBlocks.get(0).getType() + " block with message: \"" + 
+				actionBlocks.get(0).getMsg() + 
+				((getEditPane().isEditNextFlag()) ? 
+					("\" as the new next block.") : ("\" as the new pre block"));
+			getEditPane().getPrompt().setText(preNextMsg);
+			
+			// Remove all action blocks
+			actionBlocks.clear();
+		}
 	}
 
 	// Unused MouseMotionListener and MouseListener methods
@@ -366,8 +390,11 @@ class EditorPanel extends JPanel {
 
 	// ArrayList of blocks on the canvas
 	ArrayList<FlowchartBlock> editedBlocks = new ArrayList<FlowchartBlock>();
+	ArrayList<FlowchartBlock> newPreNextBlocks = new ArrayList<FlowchartBlock>();
 	
 	private boolean editMsgFlag = false; // flag if a block's msg is edited
+	private boolean editPreFlag = false;
+	private boolean editNextFlag = false;
 	
 	/**
 	 * Constructor for EditorPanel
@@ -410,6 +437,24 @@ class EditorPanel extends JPanel {
 		});
 		
 		// Add action listener for done button
+		changePreButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				editPreFlag = true;
+				editNextFlag = false;
+				getPrompt().setText("Click on new pre block.");
+			}
+		});
+		
+		// Add action listener for done button
+		changeNextButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				editNextFlag = true;
+				editPreFlag = false;
+				getPrompt().setText("Click on new next block.");
+			}
+		});
+		
+		// Add action listener for done button
 		doneButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// If editedBlocks isn't empty proceed with edit
@@ -418,14 +463,34 @@ class EditorPanel extends JPanel {
 					if(editMsgFlag) {
 						getEditedBlocks().get(0).setMsg(msgEditor.getText());
 						editMsgFlag = false; // set edit msg flag to false
+						
+						// Disable text box
+						msgEditor.setText("");
+						msgEditor.setEnabled(false);
+						
+					// If editing pre, change the 0th edited block's pre
+					}  else if(editPreFlag) {
+						// Set the current edited block's new Pre, then clear newPreNextBlocks
+						if(newPreNextBlocks.size() > 0) {
+							getEditedBlocks().get(0).setPre(newPreNextBlocks.get(0));
+							newPreNextBlocks.get(0).setNext(getEditedBlocks().get(0));
+							newPreNextBlocks.clear();
+							editPreFlag = false;
+						}
+						
+					// If editing next, change the 0th edited block's next
+					} else if(editNextFlag) {
+						// Set the current edited block's new Pre, then clear newPreNextBlocks
+						if(newPreNextBlocks.size() > 0) {
+							getEditedBlocks().get(0).setNext(newPreNextBlocks.get(0));
+							newPreNextBlocks.get(0).setPre(getEditedBlocks().get(0));
+							newPreNextBlocks.clear();
+							editNextFlag = false;
+						}
 					}
 					
 					// Remove the edited block from the ArrayList
 					editedBlocks.remove(0);
-					
-					// Disable text box
-					msgEditor.setText("");
-					msgEditor.setEnabled(false);
 				} 
 				
 				// If there are no more edited blocks, disable the panel and reset prompt
@@ -436,8 +501,8 @@ class EditorPanel extends JPanel {
 				// If not, change prompt to the new 0th block
 				} else {
 					getPrompt().setText("Editing " + 
-						editedBlocks.get(0).getType() + " block with message: " + 
-						editedBlocks.get(0).getMsg() + ". Press any button.");
+						editedBlocks.get(0).getType() + " block with message: \"" + 
+						editedBlocks.get(0).getMsg() + "\". Press any button.");
 				}
 			}
 		});
@@ -464,6 +529,14 @@ class EditorPanel extends JPanel {
 		return editedBlocks;
 	}
 
+	public ArrayList<FlowchartBlock> getNewPreNextBlocks() {
+		return newPreNextBlocks;
+	}
+
+	public void setNewPreNextBlocks(ArrayList<FlowchartBlock> blocks) {
+		newPreNextBlocks.addAll(blocks);
+	}
+
 	public TextField getMsgEditor() {
 		return msgEditor;
 	}
@@ -478,5 +551,21 @@ class EditorPanel extends JPanel {
 
 	public void setPrompt(JLabel prompt) {
 		this.prompt = prompt;
+	}
+	
+	public boolean isEditPreFlag() {
+		return editPreFlag;
+	}
+
+	public void setEditPreFlag(boolean editPreFlag) {
+		this.editPreFlag = editPreFlag;
+	}
+	
+	public boolean isEditNextFlag() {
+		return editNextFlag;
+	}
+
+	public void setEditNextFlag(boolean editNextFlag) {
+		this.editNextFlag = editNextFlag;
 	}
 }

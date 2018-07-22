@@ -1,5 +1,5 @@
-/bin/*
-/bin/
+bin/*
+bin/
 *.class
 **/*.class
-/.settings/
+.settings/
